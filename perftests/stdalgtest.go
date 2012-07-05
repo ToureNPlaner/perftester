@@ -12,13 +12,14 @@ import (
 
 type StdAlgTest struct {
 	Server    string
-	AlgSuffix string
 }
 
 var upperLat, lowerLat, leftLon, rightLon float64
 var numPoints uint
+var algSuffix string
 
 func init() {
+	flag.StringVar(&algSuffix, "algorithm", "sp", "the algorithm suffix to use")
 	flag.Float64Var(&upperLat, "upperLat", 54.0, "upper latitude")
 	flag.Float64Var(&lowerLat, "lowerLat", 47.0, "lower latitude")
 	flag.Float64Var(&leftLon, "leftLon", 5.9, "left longitude")
@@ -35,10 +36,9 @@ type tpRequest struct {
 	Points []tpPoint `json:"points"`
 }
 
-func NewStdAlgTest(server, algSuffix string) (res *StdAlgTest) {
+func NewStdAlgTest(server string) (res *StdAlgTest) {
 	res = new(StdAlgTest)
 	res.Server = server
-	res.AlgSuffix = algSuffix
 	return
 }
 
@@ -59,7 +59,7 @@ func (r *StdAlgTest) DoRequest(client *http.Client, resChan chan PerfResult) {
 		return
 	}
 	startTime := time.Now()
-	response, err := client.Post(r.Server+"alg"+r.AlgSuffix, "application/json", bytes.NewBuffer(b))
+	response, err := client.Post(r.Server+"/alg"+algSuffix, "application/json", bytes.NewBuffer(b))
 	if err != nil {
 		fmt.Println(err)
 		return
