@@ -1,16 +1,15 @@
 package perftests
 
 import (
-        "time"
-        "net/http"
+	"net/http"
+	"time"
 )
 
-
 type PerfResult struct {
-        HttpStatus int
-        Duration time.Duration
+	HttpStatus int
+	Duration   time.Duration
 }
 
-type PerfTest interface{
-        DoRequest(cl *http.Client, results chan PerfResult)
+type PerfTest interface {
+	DoRequest(cl *http.Client, results chan PerfResult)
 }
