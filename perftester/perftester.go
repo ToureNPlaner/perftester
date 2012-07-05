@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"github.com/ToureNPlaner/perftester/perftester"
+	"github.com/ToureNPlaner/perftester/perftests"
 )
 
 var server string
