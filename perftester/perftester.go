@@ -33,13 +33,24 @@ func main() {
 		test :=  perftests.NewStdAlgTest(server)
 		go doRequests(test, numRequests, resChan)
 	}
-	var sumTime int64 = 0
+	sumTime := int64(0)
+	failed :=int64(0)
 	for i := uint(0); i < numConcurrent*numRequests; i++ {
 		res := <-resChan
 		sumTime += res.Duration.Nanoseconds()
-		fmt.Printf("Status: %v Duration: %s\n", res.HttpStatus, res.Duration)
+		if res.HttpStatus != 200 {
+			failed++
+			fmt.Printf("Request failed with status %d\n", res.HttpStatus)
+		}
 	}
-	sumTime /= int64(numConcurrent*numRequests)
+	totalRequests := int64(numConcurrent*numRequests)
+	wallSumTime := int64(sumTime)/int64(numConcurrent)
 
-	fmt.Printf("Average duration: %s\n", time.Duration(sumTime))
+	averageTime := sumTime/totalRequests // in nanoseconds
+	throughput := float64(totalRequests)/time.Duration(wallSumTime).Seconds() // in #Reqs/s
+
+	fmt.Printf("Sent %d Requests (%d failed)\n", totalRequests, failed)
+	fmt.Printf("Test took: %s (wall time calculated from wait times)\n", time.Duration(wallSumTime))
+	fmt.Printf("Average duration: %s\n", time.Duration(averageTime))
+	fmt.Printf("Throughput is: %f #Reqs/s \n", throughput)
 }
