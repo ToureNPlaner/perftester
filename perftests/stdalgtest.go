@@ -25,7 +25,7 @@ func init() {
 	flag.Float64Var(&leftLon, "leftLon", 5.9, "left longitude")
 	flag.Float64Var(&rightLon, "rightLon", 14.9, "right longitude")
 	flag.UintVar(&numPoints, "numPoints", 2, "number of points in request")
-	Seed(42); // So we get always the same points
+	rand.Seed(42); // So we get always the same points
 }
 
 type tpPoint struct {
