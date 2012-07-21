@@ -25,6 +25,7 @@ func init() {
 	flag.Float64Var(&leftLon, "leftLon", 5.9, "left longitude")
 	flag.Float64Var(&rightLon, "rightLon", 14.9, "right longitude")
 	flag.UintVar(&numPoints, "numPoints", 2, "number of points in request")
+	Seed(42); // So we get always the same points
 }
 
 type tpPoint struct {
@@ -59,7 +60,7 @@ func (r *StdAlgTest) DoRequest(client *http.Client, resChan chan PerfResult) {
 		return
 	}
 	startTime := time.Now()
-	response, err := client.Post(r.Server+"/alg"+algSuffix, "application/json", bytes.NewBuffer(b))
+	response, err := client.Post(r.Server+"/alg"+algSuffix, "application/x-jackson-smile", bytes.NewBuffer(b))
 	if err != nil {
 		fmt.Println(err)
 		return
