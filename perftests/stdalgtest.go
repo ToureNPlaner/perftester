@@ -65,5 +65,6 @@ func (r *StdAlgTest) DoRequest(client *http.Client, resChan chan PerfResult) {
 		fmt.Println(err)
 		return
 	}
+	response.Body.Close()
 	resChan <- PerfResult{response.StatusCode, time.Since(startTime)}
 }
