@@ -17,9 +17,13 @@ type StdAlgTest struct {
 var upperLat, lowerLat, leftLon, rightLon float64
 var numPoints uint
 var algSuffix string
+var constrained string
+var intConstrained int
 
 func init() {
 	flag.StringVar(&algSuffix, "algorithm", "sp", "the algorithm suffix to use")
+	flag.StringVar(&constrained, "constrained", "", "name of constrained to pass")
+	flag.IntVar(&intConstrained, "intConstrained", 0, "int value of constrained")
 	flag.Float64Var(&upperLat, "upperLat", 54.0, "upper latitude")
 	flag.Float64Var(&lowerLat, "lowerLat", 47.0, "lower latitude")
 	flag.Float64Var(&leftLon, "leftLon", 5.9, "left longitude")
@@ -35,6 +39,7 @@ type tpPoint struct {
 
 type tpRequest struct {
 	Points []tpPoint `json:"points"`
+	Constraints map[string] interface{} `json:"constraints"`
 }
 
 func NewStdAlgTest(server string) (res *StdAlgTest) {
@@ -53,7 +58,10 @@ func (r *StdAlgTest) DoRequest(client *http.Client, resChan chan PerfResult) {
 	for i := uint(0); i < numPoints; i++ {
 		tpReq.Points[int(i)] = tpPoint{int32(random(lowerLat, upperLat) * 1.0e+7), int32(random(leftLon, rightLon) * 1.0e+7)}
 	}
-
+	tpReq.Constraints = make(map[string]interface{})
+	if constrained != "" {
+		tpReq.Constraints[constrained] = intConstrained
+	}
 	b, err := json.Marshal(tpReq)
 	if err != nil {
 		fmt.Println(err)
