@@ -8,6 +8,7 @@ import (
 type PerfResult struct {
 	HttpStatus int
 	Duration   time.Duration
+	ContentLength int64
 }
 
 type PerfTest interface {

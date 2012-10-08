@@ -37,7 +37,7 @@ func main() {
 		go doRequests(test, numRequests, resChan)
 	}
 	var num, failed uint
-	var duration, sumTime int64
+	var duration, sumTime, sumBytes int64
 	var mean, delta, M2 float64
 
 	for i := uint(0); i < numConcurrent*numRequests; i++ {
@@ -52,6 +52,9 @@ func main() {
 			failed++
 			fmt.Printf("Request failed with status %d\n", res.HttpStatus)
 		}
+		if res.ContentLength > 0 {
+			sumBytes += res.ContentLength
+		}
 	}
 
 	wallSumTime := time.Duration(int64(sumTime) / int64(numConcurrent))
@@ -59,12 +62,16 @@ func main() {
 	variance := M2 / (float64(numRequests - 1)) // Sample Variance
 
 	throughput := float64(num) / wallSumTime.Seconds() // in #Reqs/s
+	networkThroughput := (float64(sumBytes)/(1024*1024))/ wallSumTime.Seconds()
+
 	if outputFormat == "human" {
 		fmt.Printf("Sent %d Requests (%d failed)\n", num, failed)
 		fmt.Printf("Test took: %s (wall time calculated from wait times)\n", time.Duration(wallSumTime))
 		fmt.Printf("Average duration: %s\n", time.Duration(int64(mean)))
 		fmt.Printf("Standard Deviation: %s\n", time.Duration(int64(math.Sqrt(variance))))
 		fmt.Printf("Throughput is: %f #Reqs/s \n", throughput)
+		fmt.Printf("Data transfered: %d Bytes\n", sumBytes)
+		fmt.Printf("Network Throughput is: %f MB/s\n", networkThroughput)
 	} else if outputFormat == "csv" {
 		fmt.Printf("%f, %f, %f\n", float64(math.Sqrt(variance)/float64(time.Millisecond)), float64(mean)/float64(time.Millisecond), throughput)
 	}
