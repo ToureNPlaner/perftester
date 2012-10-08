@@ -22,8 +22,8 @@ var intConstrained int
 
 func init() {
 	flag.StringVar(&algSuffix, "algorithm", "sp", "the algorithm suffix to use")
-	flag.StringVar(&constrained, "constrained", "", "name of constrained to pass")
-	flag.IntVar(&intConstrained, "intConstrained", 0, "int value of constrained")
+	flag.StringVar(&constrained, "constrained", "", "name of constraint to pass")
+	flag.IntVar(&intConstrained, "intConstrained", 0, "int value of constraint")
 	flag.Float64Var(&upperLat, "upperLat", 54.0, "upper latitude")
 	flag.Float64Var(&lowerLat, "lowerLat", 47.0, "lower latitude")
 	flag.Float64Var(&leftLon, "leftLon", 5.9, "left longitude")
