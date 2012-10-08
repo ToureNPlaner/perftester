@@ -55,17 +55,17 @@ func main() {
 	}
 
 	wallSumTime := time.Duration(int64(sumTime) / int64(numConcurrent))
-	variance_n := M2 / float64(num)     // Population Variance
-	//variance := M2 / (float64(numRequests - 1)) // Sample Variance
+	//variance_n := M2 / float64(num)     // Population Variance
+	variance := M2 / (float64(numRequests - 1)) // Sample Variance
 
 	throughput := float64(num) / wallSumTime.Seconds() // in #Reqs/s
 	if outputFormat == "human" {
 		fmt.Printf("Sent %d Requests (%d failed)\n", num, failed)
 		fmt.Printf("Test took: %s (wall time calculated from wait times)\n", time.Duration(wallSumTime))
 		fmt.Printf("Average duration: %s\n", time.Duration(int64(mean)))
-		fmt.Printf("Standard Deviation: %s\n", time.Duration(int64(math.Sqrt(variance_n))))
+		fmt.Printf("Standard Deviation: %s\n", time.Duration(int64(math.Sqrt(variance))))
 		fmt.Printf("Throughput is: %f #Reqs/s \n", throughput)
 	} else if outputFormat == "csv" {
-		fmt.Printf("%f, %f, %f\n", float64(math.Sqrt(variance_n)/float64(time.Millisecond)), float64(mean)/float64(time.Millisecond), throughput)
+		fmt.Printf("%f, %f, %f\n", float64(math.Sqrt(variance)/float64(time.Millisecond)), float64(mean)/float64(time.Millisecond), throughput)
 	}
 }
