@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/ToureNPlaner/perftester/perftests"
 	"net/http"
 	"time"
-	"github.com/ToureNPlaner/perftester/perftests"
+	"math"
 )
 
 var server string
@@ -32,30 +33,39 @@ func main() {
 	resChan := make(chan perftests.PerfResult, numConcurrent)
 
 	for i := uint(0); i < numConcurrent; i++ {
-		test :=  perftests.NewStdAlgTest(server)
+		test := perftests.NewStdAlgTest(server)
 		go doRequests(test, numRequests, resChan)
 	}
-	sumTime := int64(0)
-	failed :=int64(0)
+	var num, failed uint
+	var duration, sumTime int64
+	var mean, delta, M2 float64
+
 	for i := uint(0); i < numConcurrent*numRequests; i++ {
 		res := <-resChan
-		sumTime += res.Duration.Nanoseconds()
+		num++
+		duration = res.Duration.Nanoseconds()
+		delta = float64(duration) - mean
+		mean += delta/float64(num)
+		M2 += delta*(float64(duration)-mean)
+		sumTime += duration
 		if res.HttpStatus != 200 {
 			failed++
 			fmt.Printf("Request failed with status %d\n", res.HttpStatus)
 		}
 	}
-	totalRequests := int64(numConcurrent*numRequests)
-	wallSumTime := int64(sumTime)/int64(numConcurrent)
 
-	averageTime := sumTime/totalRequests // in nanoseconds
-	throughput := float64(totalRequests)/time.Duration(wallSumTime).Seconds() // in #Reqs/s
+	wallSumTime := time.Duration(int64(sumTime) / int64(numConcurrent))
+	variance_n := M2 / float64(num)     // Population Variance
+	//variance := M2 / (float64(numRequests - 1)) // Sample Variance
+
+	throughput := float64(num) / wallSumTime.Seconds() // in #Reqs/s
 	if outputFormat == "human" {
-		fmt.Printf("Sent %d Requests (%d failed)\n", totalRequests, failed)
+		fmt.Printf("Sent %d Requests (%d failed)\n", num, failed)
 		fmt.Printf("Test took: %s (wall time calculated from wait times)\n", time.Duration(wallSumTime))
-		fmt.Printf("Average duration: %s\n", time.Duration(averageTime))
+		fmt.Printf("Average duration: %s\n", time.Duration(int64(mean)))
+		fmt.Printf("Standard Deviation: %s\n", time.Duration(int64(math.Sqrt(variance_n))))
 		fmt.Printf("Throughput is: %f #Reqs/s \n", throughput)
-	} else if outputFormat  == "csv" {
-		fmt.Printf("%f, %f\n", float64(time.Duration(averageTime))/float64(time.Millisecond), throughput)
+	} else if outputFormat == "csv" {
+		fmt.Printf("%f, %f, %f\n", float64(math.Sqrt(variance_n)/float64(time.Millisecond)), float64(mean)/float64(time.Millisecond), throughput)
 	}
 }
