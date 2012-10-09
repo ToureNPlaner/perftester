@@ -12,6 +12,7 @@ import (
 
 type StdAlgTest struct {
 	Server    string
+	buffer    [4096]byte
 }
 
 var upperLat, lowerLat, leftLon, rightLon float64
@@ -73,6 +74,16 @@ func (r *StdAlgTest) DoRequest(client *http.Client, resChan chan PerfResult) {
 		fmt.Println(err)
 		return
 	}
+	contentLength := response.ContentLength
+	var length int
+	if contentLength < 0 {
+		length, err = response.Body.Read(r.buffer[:])
+		for err == nil {
+			contentLength += int64(length)
+			length, err = response.Body.Read(r.buffer[:])
+		}
+	}
+
 	response.Body.Close()
-	resChan <- PerfResult{response.StatusCode, time.Since(startTime), response.ContentLength}
+	resChan <- PerfResult{response.StatusCode, time.Since(startTime), contentLength}
 }
