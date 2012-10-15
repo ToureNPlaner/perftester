@@ -1,5 +1,5 @@
 #!/bin/zsh
-echo 'Algorithm, # Threads, avg. Duration in ms, avg. size in kb, throughput, transferrate in Mbit/s, max Level'
+echo '#Algorithm, Num Threads, avg. Duration in ms, avg. size in kb, throughput, transferrate in Mbit/s, max Level'
 
 for level in `seq 10 10 120`;
 do
@@ -13,5 +13,6 @@ do
 		sleep 1
 		echo -e -n "updowng, $threads, " `perftester -concurrent 16 -format csv -algorithm updowng -constrained maxSearchLevel -intConstrained $level -requests 200 -server 'http://localhost:8080'` ", $level\n"
 	done
-
+	# For gnuplot datablocks
+	echo -e -n '\n\n'
 done
